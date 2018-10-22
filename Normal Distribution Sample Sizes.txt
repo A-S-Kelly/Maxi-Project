@@ -1,0 +1,39 @@
+library(lattice)
+library(knitr)
+set.seed(7)
+
+# Generate normally distributed numbers and save to vectors
+
+n10 <- c()
+for (i in 1:1000) {
+  rnumbers10 <- rnorm(10)
+  n10 <- c(n10, rnumbers10)
+}
+
+n20 <- c()
+for (i in 1:1000) {
+  rnumbers20 <- rnorm(20)
+  n20 <- c(n20, rnumbers20)
+}
+
+n50 <- c()
+for (i in 1:1000) {
+  rnumbers50 <- rnorm(50)
+  n50 <- c(n50, rnumbers50)
+}
+
+n100 <- c()
+for (i in 1:1000) {
+  rnumbers100 <- rnorm(1000)
+  n100 <- c(n100, rnumbers100)
+}
+
+# Plot density functions
+dat <- data.frame(dens = c(n10, n20, n50, n100)
+                  , lines = c(10, 20, 50, 100))
+
+densityplot(~dens,data=dat,groups = lines,
+            plot.points = FALSE, ref = TRUE, 
+            auto.key = list(space = "right"))
+
+# Not certain why this isn't working?
