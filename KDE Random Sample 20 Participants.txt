@@ -1,0 +1,21 @@
+set.seed(21)
+library(tidyverse)
+
+# Select random sample of participants 
+participant_numbers <- sample(flp$participant, 20, replace = FALSE)
+participant_numbers
+
+# Filter participant data
+participant_data <- data.frame(filter(flp, participant == 764 | participant == 247 | 
+         participant == 680 | participant == 180 | participant == 936 | participant == 896 |
+         participant == 100 | participant == 168 | participant == 962 | participant == 826 |
+         participant == 649 | participant == 912 | participant == 57 | participant == 602 |
+         participant == 171 | participant == 37 | participant == 511 | participant == 275 |
+         participant == 468 | participant == 616))
+
+# Plot results in geom_density
+ggplot(participant_data, aes(rt, colour = participant)) +
+  geom_density() +
+  xlim(0, 2250) +
+  facet_wrap(~condition)
+
