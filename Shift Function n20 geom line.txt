@@ -1,199 +1,209 @@
 set.seed(21)
 library(tidyverse)
+source("wilcox_modified.txt")
+source("rgar_utils.txt")
+source("rgar_visualisation.txt")
+source("Rallfun-v35.txt")
+
 
 # Extract data from flp
+
 participant_numbers <- sample(flp$participant, 20, replace = FALSE)
-participant_numbers
 
 participant_data <- data.frame(filter(flp, participant == 764 | participant == 247 | 
-        participant == 680 | participant == 180 | participant == 936 | participant == 896 |
-        participant == 100 | participant == 168 | participant == 962 | participant == 826 |
-        participant == 649 | participant == 912 | participant == 57 | participant ==  602 |
-        participant == 171 | participant == 37 | participant == 511 | participant == 275 |
-        participant == 486 | participant == 616))
+                                        participant == 680 | participant == 180 | participant == 936 | participant == 896 |
+                                        participant == 100 | participant == 168 | participant == 962 | participant == 826 |
+                                        participant == 649 | participant == 912 | participant == 57 | participant ==  602 |
+                                        participant == 171 | participant == 37 | participant == 511 | participant == 275 |
+                                        participant == 486 | participant == 616))
 
-# Split into word vs non-word
+# Filter sampled participants according to word and non-word rt data
 
-nonword_data <- data.frame(subset(participant_data,
-                       participant_data$condition == "non-word"))
+par_764_word <- filter(participant_data, participant == 764 & condition == "word")
+par_764_non_word <- filter(participant_data, participant == 764 & condition == "non-word")
 
-word_data <- subset(participant_data,
-                    participant_data$condition == "word")
+par_247_word <- filter(participant_data, participant == 247 & condition == "word")
+par_247_non_word <- filter(participant_data, participant == 247 & condition == "non-word")
+
+par_680_word <- filter(participant_data, participant == 680 & condition == "word")
+par_680_non_word <- filter(participant_data, participant == 680 & condition == "non-word")
+
+par_180_word <- filter(participant_data, participant == 180 & condition == "word")
+par_180_non_word <- filter(participant_data, participant == 180 & condition == "non-word")
+
+par_936_word <- filter(participant_data, participant == 936 & condition == "word")
+par_936_non_word <- filter(participant_data, participant == 936 & condition == "non-word")
+
+par_896_word <- filter(participant_data, participant == 896 & condition == "word")
+par_896_non_word <- filter(participant_data, participant == 896 & condition == "non-word")
+
+par_100_word <- filter(participant_data, participant == 100 & condition == "word")
+par_100_non_word <- filter(participant_data, participant == 100 & condition == "non-word")
+
+par_168_word <- filter(participant_data, participant == 168 & condition == "word")
+par_168_non_word <- filter(participant_data, participant == 168 & condition == "non-word")
+
+par_962_word <- filter(participant_data, participant == 962 & condition == "word")
+par_962_non_word <- filter(participant_data, participant == 962 & condition == "non-word")
+
+par_826_word <- filter(participant_data, participant == 826 & condition == "word")
+par_826_non_word <- filter(participant_data, participant == 826 & condition == "non-word")
+
+par_649_word <- filter(participant_data, participant == 649 & condition == "word")
+par_649_non_word <- filter(participant_data, participant == 649 & condition == "non-word")
+
+par_912_word <- filter(participant_data, participant == 912 & condition == "word")
+par_912_non_word <- filter(participant_data, participant == 912 & condition == "non-word")
+
+par_57_word <- filter(participant_data, participant == 57 & condition == "word")
+par_57_non_word <- filter(participant_data, participant == 57 & condition == "non-word")
+
+par_602_word <- filter(participant_data, participant == 602 & condition == "word")
+par_602_non_word <- filter(participant_data, participant == 602 & condition == "non-word")
+
+par_171_word <- filter(participant_data, participant == 171 & condition == "word")
+par_171_non_word <- filter(participant_data, participant == 171 & condition == "non-word")
+
+par_37_word <- filter(participant_data, participant == 37 & condition == "word")
+par_37_non_word <- filter(participant_data, participant == 37 & condition == "non-word")
+
+par_511_word <- filter(participant_data, participant == 511 & condition == "word")
+par_511_non_word <- filter(participant_data, participant == 511 & condition == "non-word")
+
+par_275_word <- filter(participant_data, participant == 275 & condition == "word")
+par_275_non_word <- filter(participant_data, participant == 275 & condition == "non-word")
+
+par_486_word <- filter(participant_data, participant == 486 & condition == "word")
+par_486_non_word <- filter(participant_data, participant == 486 & condition == "non-word")
+
+par_616_word <- filter(participant_data, participant == 616 & condition == "word")
+par_616_non_word <- filter(participant_data, participant == 616 & condition == "non-word")
+
+# Compute shift function, store differences and word deciles 
+
+par_764_shift <- shifthd(par_764_word$rt, par_764_non_word$rt, nboot=200)
+Diff_1 <- par_764_shift[, 3]
+Wd_decile_1 <- deciles(par_764_word$rt)
 
 
+par_247_shift <- shifthd(par_247_word$rt, par_247_non_word$rt, nboot=200)
+Diff_2 <- par_247_shift[, 3]
+Wd_decile_2 <- deciles(par_247_word$rt)
 
-# Calculate non-word rt deciles
-nwPar1 <- filter(nonword_data, participant == 764)
-nwPar1Dec <- as.vector(quantile(nwPar1$rt, seq(0, 1, length = 10), type = 5))
+par_680_shift <- shifthd(par_680_word$rt, par_680_non_word$rt, nboot=200)
+Diff_3 <- par_680_shift[, 3]
+Wd_decile_3 <- deciles(par_680_word$rt)
 
-nwPar2 <- filter(nonword_data, participant == 247)
-nwPar2Dec <- as.vector(quantile(nwPar2$rt, seq(0, 1, length = 10), type = 5))
+par_180_shift <- shifthd(par_180_word$rt, par_180_non_word$rt, nboot=200)
+Diff_4 <- par_180_shift[, 3]
+Wd_decile_4 <- deciles(par_180_word$rt)
 
-nwPar3 <- filter(nonword_data, participant == 680)
-nwPar3Dec <- as.vector(quantile(nwPar3$rt, seq(0, 1, length = 10), type = 5))
+par_936_shift <- shifthd(par_936_word$rt, par_936_non_word$rt, nboot=200)
+Diff_5 <- par_936_shift[, 3]
+Wd_decile_5 <- deciles(par_936_word$rt)
 
-nwPar4 <- filter(nonword_data, participant == 180)
-nwPar4Dec <- as.vector(quantile(nwPar4$rt, seq(0, 1, length = 10), type = 5))
+par_896_shift <- shifthd(par_896_word$rt, par_896_non_word$rt, nboot=200)
+Diff_6 <- par_896_shift[, 3]
+Wd_decile_6 <- deciles(par_896_word$rt)
 
-nwPar5 <- filter(nonword_data, participant == 936)
-nwPar5Dec <- as.vector(quantile(nwPar5$rt, seq(0, 1, length = 10), type = 5))
+par_100_shift <- shifthd(par_100_word$rt, par_100_non_word$rt, nboot=200)
+Diff_7 <- par_100_shift[, 3]
+Wd_decile_7 <- deciles(par_100_word$rt)
 
-nwPar6 <- filter(nonword_data, participant == 896)
-nwPar6Dec <- as.vector(quantile(nwPar6$rt, seq(0, 1, length = 10), type = 5))
+par_168_shift <- shifthd(par_168_word$rt, par_168_non_word$rt, nboot=200)
+Diff_8 <- par_168_shift[, 3]
+Wd_decile_8 <- deciles(par_168_word$rt)
 
-nwPar7 <- filter(nonword_data, participant == 100)
-nwPar7Dec <- as.vector(quantile(nwPar7$rt, seq(0, 1, length = 10), type = 5))
+par_962_shift <- shifthd(par_962_word$rt, par_962_non_word$rt, nboot=200)
+Diff_9 <- par_962_shift[, 3]
+Wd_decile_9 <- deciles(par_962_word$rt)
 
-nwPar8 <- filter(nonword_data, participant == 168)
-nwPar8Dec <- as.vector(quantile(nwPar8$rt, seq(0, 1, length = 10), type = 5))
+par_826_shift <- shifthd(par_826_word$rt, par_826_non_word$rt, nboot=200)
+Diff_10 <- par_826_shift[, 3]
+Wd_decile_10 <- deciles(par_826_word$rt)
 
-nwPar9 <- filter(nonword_data, participant == 962)
-nwPar9Dec <- as.vector(quantile(nwPar9$rt, seq(0, 1, length = 10), type = 5))
+par_649_shift <- shifthd(par_649_word$rt, par_649_non_word$rt, nboot=200)
+Diff_11 <- par_649_shift[, 3]
+Wd_decile_11 <- deciles(par_649_word$rt)
 
-nwPar10 <- filter(nonword_data, participant == 826)
-nwPar10Dec <- as.vector(quantile(nwPar10$rt, seq(0, 1, length = 10), type = 5))
+par_912_shift <- shifthd(par_912_word$rt, par_912_non_word$rt, nboot=200)
+Diff_12 <- par_912_shift[, 3]
+Wd_decile_12 <- deciles(par_912_word$rt)
 
-nwPar11 <- filter(nonword_data, participant == 649)
-nwPar11Dec <- as.vector(quantile(nwPar11$rt, seq(0, 1, length = 10), type = 5))
+par_57_shift <- shifthd(par_57_word$rt, par_57_non_word$rt, nboot=200)
+Diff_13 <- par_57_shift[, 3]
+Wd_decile_13 <- deciles(par_57_word$rt)
 
-nwPar12 <- filter(nonword_data, participant == 912)
-nwPar12Dec <- as.vector(quantile(nwPar12$rt, seq(0, 1, length = 10), type = 5))
+par_602_shift <- shifthd(par_602_word$rt, par_602_non_word$rt, nboot=200)
+Diff_14 <- par_602_shift[, 3]
+Wd_decile_14 <- deciles(par_602_word$rt)
 
-nwPar13 <- filter(nonword_data, participant == 57)
-nwPar13Dec <- as.vector(quantile(nwPar13$rt, seq(0, 1, length = 10), type = 5))
+par_171_shift <- shifthd(par_171_word$rt, par_171_non_word$rt, nboot=200)
+Diff_15 <- par_171_shift[, 3]
+Wd_decile_15 <- deciles(par_171_word$rt)
 
-nwPar14 <- filter(nonword_data, participant == 602)
-nwPar14Dec <- as.vector(quantile(nwPar14$rt, seq(0, 1, length = 10), type = 5))
+par_37_shift <- shifthd(par_37_word$rt, par_37_non_word$rt, nboot=200)
+Diff_16 <- par_37_shift[, 3]
+Wd_decile_16 <- deciles(par_37_word$rt)
 
-nwPar15 <- filter(nonword_data, participant == 171)
-nwPar15Dec <- as.vector(quantile(nwPar15$rt, seq(0, 1, length = 10), type = 5))
+par_511_shift <- shifthd(par_511_word$rt, par_511_non_word$rt, nboot=200)
+Diff_17 <- par_511_shift[, 3]
+Wd_decile_17 <- deciles(par_511_word$rt)
 
-nwPar16 <- filter(nonword_data, participant == 37)
-nwPar16Dec <- as.vector(quantile(nwPar16$rt, seq(0, 1, length = 10), type = 5))
+par_275_shift <- shifthd(par_275_word$rt, par_275_non_word$rt, nboot=200)
+Diff_18 <- par_275_shift[, 3]
+Wd_decile_18 <- deciles(par_275_word$rt)
 
-nwPar17 <- filter(nonword_data, participant == 511)
-nwPar17Dec <- as.vector(quantile(nwPar17$rt, seq(0, 1, length = 10), type = 5))
+par_486_shift <- shifthd(par_486_word$rt, par_486_non_word$rt, nboot=200)
+Diff_19 <- par_486_shift[, 3]
+Wd_decile_19 <- deciles(par_486_word$rt)
 
-nwPar18 <- filter(nonword_data, participant == 275)
-nwPar18Dec <- as.vector(quantile(nwPar18$rt, seq(0, 1, length = 10), type = 5))
+par_616_shift <- shifthd(par_616_word$rt, par_616_non_word$rt, nboot=200)
+Diff_20 <- par_616_shift[, 3]
+Wd_decile_20 <- deciles(par_616_word$rt)
 
-nwPar19 <- filter(nonword_data, participant == 486)
-nwPar19Dec <- as.vector(quantile(nwPar19$rt, seq(0, 1, length = 10), type = 5))
+# Gather differences and word deciles into single vectors, then use them to form a dataframe
+# along with added participant numbers
 
-nwPar20 <- filter(nonword_data, participant == 616)
-nwPar20Dec <- as.vector(quantile(nwPar20$rt, seq(0, 1, length = 10), type = 5))
 
-# Calculate word rt deciles
-Par1 <- filter(word_data, participant == 764)
-Par1Dec <- as.vector(quantile(Par1$rt, seq(0, 1, length = 10), type = 5))
+Word_Deciles <- c(Wd_decile_1, Wd_decile_2, Wd_decile_3, Wd_decile_4, Wd_decile_5, 
+                  Wd_decile_6, Wd_decile_7, Wd_decile_8, Wd_decile_9, Wd_decile_10,
+                  Wd_decile_11, Wd_decile_12, Wd_decile_13, Wd_decile_14, Wd_decile_15,
+                  Wd_decile_16, Wd_decile_17, Wd_decile_18, Wd_decile_19, Wd_decile_20)
 
-Par2 <- filter(word_data, participant == 247)
-Par2Dec <- as.vector(quantile(Par2$rt, seq(0, 1, length = 10), type = 5))
+Decile_Differences <- c(Diff_1, Diff_2, Diff_3, Diff_4, Diff_5, Diff_6, Diff_7, Diff_8,
+                        Diff_9, Diff_10, Diff_11, Diff_12, Diff_13, Diff_14, Diff_15,
+                        Diff_16, Diff_17, Diff_18, Diff_19, Diff_20)
 
-Par3 <- filter(word_data, participant == 680)
-Par3Dec <- as.vector(quantile(Par3$rt, seq(0, 1, length = 10), type = 5))
 
-Par4 <- filter(word_data, participant == 180)
-Par4Dec <- as.vector(quantile(Par4$rt, seq(0, 1, length = 10), type = 5))
+Word_Decile_df <- data.frame(cbind(Word_Deciles, Decile_Differences))
 
-Par5 <- filter(word_data, participant == 936)
-Par5Dec <- as.vector(quantile(Par5$rt, seq(0, 1, length = 10), type = 5))
+Word_Decile_df$Deciles <- factor(rep(seq(1,20), each = 9))
 
-Par6 <- filter(word_data, participant == 896)
-Par6Dec <- as.vector(quantile(Par6$rt, seq(0, 1, length = 10), type = 5))
+Word_Decile_df$Word_Deciles <- rep(seq(1,9), 20)
 
-Par7 <- filter(word_data, participant == 100)
-Par7Dec <- as.vector(quantile(Par7$rt, seq(0, 1, length = 10), type = 5))
+for (i in Word_Decile_df$Word_Deciles) {
+  Word_Decile_df$Participants <- rep(c("One", "Two", "Three", "Four", "Five", "Six", 
+                                       "Seven", "Eight", "Nine", "Ten", "Eleven", 
+                                       "Twelve", "Thirteen", "Fourteen", "Fifteen",
+                                       "Sixteen", "Seventeen", "Eighteen", "Nineteen", 
+                                       "Twenty"), each = 9)
+}
 
-Par8 <- filter(word_data, participant == 168)
-Par8Dec <- as.vector(quantile(Par8$rt, seq(0, 1, length = 10), type = 5))
+# Plot the shift function
 
-Par9 <- filter(word_data, participant == 962)
-Par9Dec <- as.vector(quantile(Par9$rt, seq(0, 1, length = 10), type = 5))
+Final_Plot <-ggplot(Word_Decile_df, aes(x = Word_Deciles, y= Decile_Differences, 
+                                        group = Participants, ylim(-400, 400) +
+                                          xlab("Word Decile"), ylab("Decile Differences"))) +
+  geom_line(aes(color=Participants))+
+  geom_point(aes(color=Participants))+
+  geom_abline(mapping = NULL, data = NULL, slope = 0, intercept = 0,
+              na.rm = FALSE, show.legend = NA) +
+  theme(legend.position = 'none') +
+  scale_x_continuous(breaks = seq(0, 10, by = 1)) +
+  coord_cartesian(ylim = c(-400, 400))
 
-Par10 <- filter(word_data, participant == 826)
-Par10Dec <- as.vector(quantile(Par10$rt, seq(0, 1, length = 10), type = 5))
 
-Par11 <- filter(word_data, participant == 649)
-Par11Dec <- as.vector(quantile(Par11$rt, seq(0, 1, length = 10), type = 5))
+Final_Plot 
 
-Par12 <- filter(word_data, participant == 912)
-Par12Dec <- as.vector(quantile(Par12$rt, seq(0, 1, length = 10), type = 5))
 
-Par13 <- filter(word_data, participant == 57)
-Par13Dec <- as.vector(quantile(Par13$rt, seq(0, 1, length = 10), type = 5))
-
-Par14 <- filter(word_data, participant == 602)
-Par14Dec <- as.vector(quantile(Par14$rt, seq(0, 1, length = 10), type = 5))
-
-Par15 <- filter(word_data, participant == 171)
-Par15Dec <- as.vector(quantile(Par15$rt, seq(0, 1, length = 10), type = 5))
-
-Par16 <- filter(word_data, participant == 37)
-Par16Dec <- as.vector(quantile(Par16$rt, seq(0, 1, length = 10), type = 5))
-
-Par17 <- filter(word_data, participant == 511)
-Par17Dec <- as.vector(quantile(Par17$rt, seq(0, 1, length = 10), type = 5))
-
-Par18 <- filter(word_data, participant == 275)
-Par18Dec <- as.vector(quantile(Par18$rt, seq(0, 1, length = 10), type = 5))
-
-Par19 <- filter(word_data, participant == 486)
-Par19Dec <- as.vector(quantile(Par19$rt, seq(0, 1, length = 10), type = 5))
-
-Par20 <- filter(word_data, participant == 616)
-Par20Dec <- as.vector(quantile(Par20$rt, seq(0, 1, length = 10), type = 5))
-
-# Calculate word to non-word shift and store as full vector
-Par_1_diff <- Par1Dec - nwPar1Dec
-Par_2_diff <- Par2Dec - nwPar2Dec
-Par_3_diff <- Par3Dec - nwPar3Dec
-Par_4_diff <- Par4Dec - nwPar4Dec
-Par_5_diff <- Par5Dec - nwPar5Dec
-Par_6_diff <- Par6Dec - nwPar6Dec
-Par_7_diff <- Par7Dec - nwPar7Dec
-Par_8_diff <- Par8Dec - nwPar8Dec
-Par_9_diff <- Par9Dec - nwPar9Dec
-Par_10_diff <- Par10Dec - nwPar10Dec
-Par_10_diff <- Par10Dec - nwPar10Dec
-Par_11_diff <- Par11Dec - nwPar11Dec
-Par_12_diff <- Par12Dec - nwPar12Dec
-Par_13_diff <- Par13Dec - nwPar13Dec
-Par_14_diff <- Par14Dec - nwPar14Dec
-Par_15_diff <- Par15Dec - nwPar15Dec
-Par_16_diff <- Par16Dec - nwPar16Dec
-Par_17_diff <- Par17Dec - nwPar17Dec
-Par_18_diff <- Par18Dec - nwPar18Dec
-Par_19_diff <- Par19Dec - nwPar19Dec
-Par_20_diff <- Par20Dec - nwPar20Dec
-
-Decile_Differences <- c(Par_1_diff, Par_2_diff, Par_3_diff, Par_4_diff, Par_5_diff,
-                        Par_6_diff, Par_7_diff, Par_8_diff, Par_9_diff, Par_10_diff,
-                        Par_11_diff, Par_12_diff, Par_13_diff, Par_14_diff, Par_15_diff,
-                        Par_16_diff, Par_17_diff, Par_18_diff, Par_19_diff, Par_20_diff)
-
-# Store as data frame, add participant numbers, add word decile column and name columns
-
-Decile_Differences <- data.frame(Decile_Differences)
-Decile_Differences$Participants <- c(rep("One", 10), rep("Two", 10), rep("Three", 10), rep("Four", 10),
-                                     rep("Five", 10), rep("Six", 10), rep("Seven", 10), rep("Eight", 10),
-                                     rep("Nine", 10), rep("Ten", 10), rep("Eleven", 10), rep("Twelve", 10),
-                                     rep("Thirteen", 10), rep("Fourteen", 10), rep("Fifteen", 10),
-                                     rep("Sixteen", 10), rep("Seventeen", 10), rep ("Eighteen", 10),
-                                     rep("Nineteen", 10), rep("Twenty", 10))
-Decile_Differences <- Decile_Differences[c(2, 1)]
-Decile_Differences$Word_Deciles <- Word_Diff 
-
-names(Decile_Differences) <- c("participants", "DecileDifferences", "WordCondition")
-
-# Plot differences
-as.factor(Decile_Differences$participants)
-
-Final_Plot <-ggplot(Decile_Differences, aes(x=WordCondition, y=DecileDifferences, 
-                                   group = participants, 
-                                   xlab("Word Deciles"), ylab("Decile Differences"))) +
-  geom_errorbar(aes(ymin=DecileDifferences-25, ymax=DecileDifferences+25), width=.1,) +
-  geom_line(aes(color=participants))+
-  geom_point(aes(color=participants))
-  
-Final_Plot
