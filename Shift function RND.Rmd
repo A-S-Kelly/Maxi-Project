@@ -1,0 +1,38 @@
+---
+output: html_notebook
+title: "Shift Function With Randomly Distributed Data"
+---
+
+Load in packages
+
+```{r}
+library(ggplot2)
+source("Rallfun-v35.txt")
+source("rgar_utils.txt")
+source("rgar_visualisation.txt")
+source("akerd.txt")
+source("wilcox_modified.txt")
+set.seed(17)
+
+```
+
+Generate randomly distributed data 
+
+```{r}
+x <- rnorm(10000)
+y <- rnorm(10000)
+df <- cbind(x, y)
+df2 <- as.data.frame(df)
+colnames(df2) <- c("a", "b")
+
+```
+
+Compute and plot the shift function
+
+```{r}
+out <- shifthd(df2$a, df2$b, nboot=200)
+sf <- plot.sf(data=out)
+sf
+
+```
+

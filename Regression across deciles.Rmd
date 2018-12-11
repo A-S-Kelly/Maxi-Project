@@ -1,0 +1,215 @@
+---
+title: "Maxi Project: Regression and Stochastic Dominance Function"
+output: html_notebook
+---
+
+Load in packages and files
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+source("Rallfun-v35.txt")
+set.seed(21)
+```
+
+
+
+Select sample of participants and extract data
+
+```{r}
+participant_numbers <- sample(flp$participant, 20, replace = FALSE)
+
+participant_data <- data.frame(filter(flp, participant == 764 | participant == 247 | 
+                                        participant == 680 | participant == 180 | participant == 936 | participant == 896 |
+                                        participant == 100 | participant == 168 | participant == 962 | participant == 826 |
+                                        participant == 649 | participant == 912 | participant == 57 | participant ==  602 |
+                                        participant == 171 | participant == 37 | participant == 511 | participant == 275 |
+                                        participant == 486 | participant == 616))
+```
+
+
+
+Separate according to word and non-word conditions
+
+```{r}
+par_764_word <- filter(participant_data, participant == 764 & condition == "word")
+par_764_non_word <- filter(participant_data, participant == 764 & condition == "non-word")
+
+par_247_word <- filter(participant_data, participant == 247 & condition == "word")
+par_247_non_word <- filter(participant_data, participant == 247 & condition == "non-word")
+
+par_680_word <- filter(participant_data, participant == 680 & condition == "word")
+par_680_non_word <- filter(participant_data, participant == 680 & condition == "non-word")
+
+par_180_word <- filter(participant_data, participant == 180 & condition == "word")
+par_180_non_word <- filter(participant_data, participant == 180 & condition == "non-word")
+
+par_936_word <- filter(participant_data, participant == 936 & condition == "word")
+par_936_non_word <- filter(participant_data, participant == 936 & condition == "non-word")
+
+par_896_word <- filter(participant_data, participant == 896 & condition == "word")
+par_896_non_word <- filter(participant_data, participant == 896 & condition == "non-word")
+
+par_100_word <- filter(participant_data, participant == 100 & condition == "word")
+par_100_non_word <- filter(participant_data, participant == 100 & condition == "non-word")
+
+par_168_word <- filter(participant_data, participant == 168 & condition == "word")
+par_168_non_word <- filter(participant_data, participant == 168 & condition == "non-word")
+
+par_962_word <- filter(participant_data, participant == 962 & condition == "word")
+par_962_non_word <- filter(participant_data, participant == 962 & condition == "non-word")
+
+par_826_word <- filter(participant_data, participant == 826 & condition == "word")
+par_826_non_word <- filter(participant_data, participant == 826 & condition == "non-word")
+
+par_649_word <- filter(participant_data, participant == 649 & condition == "word")
+par_649_non_word <- filter(participant_data, participant == 649 & condition == "non-word")
+
+par_912_word <- filter(participant_data, participant == 912 & condition == "word")
+par_912_non_word <- filter(participant_data, participant == 912 & condition == "non-word")
+
+par_57_word <- filter(participant_data, participant == 57 & condition == "word")
+par_57_non_word <- filter(participant_data, participant == 57 & condition == "non-word")
+
+par_602_word <- filter(participant_data, participant == 602 & condition == "word")
+par_602_non_word <- filter(participant_data, participant == 602 & condition == "non-word")
+
+par_171_word <- filter(participant_data, participant == 171 & condition == "word")
+par_171_non_word <- filter(participant_data, participant == 171 & condition == "non-word")
+
+par_37_word <- filter(participant_data, participant == 37 & condition == "word")
+par_37_non_word <- filter(participant_data, participant == 37 & condition == "non-word")
+
+par_511_word <- filter(participant_data, participant == 511 & condition == "word")
+par_511_non_word <- filter(participant_data, participant == 511 & condition == "non-word")
+
+par_275_word <- filter(participant_data, participant == 275 & condition == "word")
+par_275_non_word <- filter(participant_data, participant == 275 & condition == "non-word")
+
+par_486_word <- filter(participant_data, participant == 486 & condition == "word")
+par_486_non_word <- filter(participant_data, participant == 486 & condition == "non-word")
+
+par_616_word <- filter(participant_data, participant == 616 & condition == "word")
+par_616_non_word <- filter(participant_data, participant == 616 & condition == "non-word")
+
+```
+
+
+
+Combine deciles into a dataframe, add decile numbers
+
+```{r}
+Wd_decile_1 <- deciles(par_764_word$rt)
+Wd_decile_2 <- deciles(par_247_word$rt)
+Wd_decile_3 <- deciles(par_680_word$rt)
+Wd_decile_4 <- deciles(par_180_word$rt)
+Wd_decile_5 <- deciles(par_936_word$rt)
+Wd_decile_6 <- deciles(par_896_word$rt)
+Wd_decile_7 <- deciles(par_100_word$rt)
+Wd_decile_8 <- deciles(par_168_word$rt)
+Wd_decile_9 <- deciles(par_962_word$rt)
+Wd_decile_10 <- deciles(par_826_word$rt)
+Wd_decile_11 <- deciles(par_649_word$rt)
+Wd_decile_12 <- deciles(par_912_word$rt)
+Wd_decile_13 <- deciles(par_57_word$rt)
+Wd_decile_14 <- deciles(par_602_word$rt)
+Wd_decile_15 <- deciles(par_171_word$rt)
+Wd_decile_16 <- deciles(par_37_word$rt)
+Wd_decile_17 <- deciles(par_511_word$rt)
+Wd_decile_18 <- deciles(par_275_word$rt)
+Wd_decile_19 <- deciles(par_486_word$rt)
+Wd_decile_20 <- deciles(par_616_word$rt)
+
+Non_Wd_decile_1 <- deciles(par_764_non_word$rt)
+Non_Wd_decile_2 <- deciles(par_247_non_word$rt)
+Non_Wd_decile_3 <- deciles(par_680_non_word$rt)
+Non_Wd_decile_4 <- deciles(par_180_non_word$rt)
+Non_Wd_decile_5 <- deciles(par_936_non_word$rt)
+Non_Wd_decile_6 <- deciles(par_896_non_word$rt)
+Non_Wd_decile_7 <- deciles(par_100_non_word$rt)
+Non_Wd_decile_8 <- deciles(par_168_non_word$rt)
+Non_Wd_decile_9 <- deciles(par_962_non_word$rt)
+Non_Wd_decile_10 <- deciles(par_826_non_word$rt)
+Non_Wd_decile_11 <- deciles(par_649_non_word$rt)
+Non_Wd_decile_12 <- deciles(par_912_non_word$rt)
+Non_Wd_decile_13 <- deciles(par_57_non_word$rt)
+Non_Wd_decile_14 <- deciles(par_602_non_word$rt)
+Non_Wd_decile_15 <- deciles(par_171_non_word$rt)
+Non_Wd_decile_16 <- deciles(par_37_non_word$rt)
+Non_Wd_decile_17 <- deciles(par_511_non_word$rt)
+Non_Wd_decile_18 <- deciles(par_275_non_word$rt)
+Non_Wd_decile_19 <- deciles(par_486_non_word$rt)
+Non_Wd_decile_20 <- deciles(par_616_non_word$rt)
+
+Word_Deciles <- c(Wd_decile_1, Wd_decile_2, Wd_decile_3, Wd_decile_4, Wd_decile_5, 
+                  Wd_decile_6, Wd_decile_7, Wd_decile_8, Wd_decile_9, Wd_decile_10,
+                  Wd_decile_11, Wd_decile_12, Wd_decile_13, Wd_decile_14, Wd_decile_15,
+                  Wd_decile_16, Wd_decile_17, Wd_decile_18, Wd_decile_19, Wd_decile_20)
+
+Non_Word_Deciles <- c(Non_Wd_decile_1, Non_Wd_decile_2, Non_Wd_decile_3, Non_Wd_decile_4,
+                      Non_Wd_decile_5, Non_Wd_decile_6, Non_Wd_decile_7, Non_Wd_decile_8,
+                      Non_Wd_decile_9, Non_Wd_decile_10, Non_Wd_decile_11, Non_Wd_decile_12,
+                      Non_Wd_decile_13, Non_Wd_decile_14, Non_Wd_decile_15, Non_Wd_decile_16,
+                      Non_Wd_decile_17, Non_Wd_decile_18, Non_Wd_decile_19,
+                      Non_Wd_decile_20)
+
+All_Deciles <- as.data.frame(cbind(Word_Deciles, Non_Word_Deciles))
+
+All_Deciles$Deciles <- rep(seq(1,9), 20)
+```
+
+
+
+Arrange according to deciles and run linear regression with confidence intervals across each
+condition as a function of deciles
+
+```{r echo=TRUE}
+Final_Df <- arrange(All_Deciles, Deciles)
+
+Decile_One <- Final_Df[1:20,]
+LR_One <- lm(data = Decile_One, Word_Deciles ~ Non_Word_Deciles)
+summary(LR_One)
+confint(LR_One, "Non_Word_Deciles", level = 0.95)
+
+Decile_Two <- Final_Df[21:40,]
+LR_Two <- lm(data = Decile_Two, Word_Deciles ~ Non_Word_Deciles)
+summary(LR_Two)
+confint(LR_Two, "Non_Word_Deciles", level = 0.95)
+
+Decile_Three <- Final_Df[41:60,]
+LR_Three <- lm(data = Decile_Three, Word_Deciles ~ Non_Word_Deciles)
+summary(LR_Three)
+confint(LR_Three, "Non_Word_Deciles", level = 0.95)
+
+Decile_Four <- Final_Df[61:80,]
+LR_Four <- lm(data = Decile_Four, Word_Deciles ~ Non_Word_Deciles)
+summary(LR_Four)
+confint(LR_Four, "Non_Word_Deciles", level = 0.95)
+
+Decile_Five <- Final_Df[81:100,]
+LR_Five <- lm(data = Decile_Five, Word_Deciles ~ Non_Word_Deciles)
+summary(LR_Five)
+confint(LR_Five, "Non_Word_Deciles", level = 0.95)
+
+Decile_Six <- Final_Df[101:120,]
+LR_Six <- lm(data = Decile_Six, Word_Deciles ~ Non_Word_Deciles)
+summary(LR_Six)
+confint(LR_Six, "Non_Word_Deciles", level = 0.95)
+
+Decile_Seven <- Final_Df[121:140,]
+LR_Seven <- lm(data = Decile_Seven, Word_Deciles ~ Non_Word_Deciles)
+summary(LR_Seven)
+confint(LR_Seven, "Non_Word_Deciles", level = 0.95)
+
+Decile_Eight <- Final_Df[141:160,]
+LR_Eight <- lm(data = Decile_Eight, Word_Deciles ~ Non_Word_Deciles)
+summary(LR_Eight)
+confint(LR_Eight, "Non_Word_Deciles", level = 0.95)
+
+Decile_Nine <- Final_Df[161:180,]
+LR_Nine <- lm(data = Decile_Nine, Word_Deciles ~ Non_Word_Deciles)
+summary(LR_Nine)
+confint(LR_Nine, "Non_Word_Deciles", level = 0.95)
+
+```
+
