@@ -1,0 +1,72 @@
+---
+title: "Correlation Function"
+output: html_notebook
+---
+
+Load data and packages
+
+```{r}
+library(tidyverse)
+library(purrr)
+source("Rallfun-v35.txt")
+load("french_lexicon_project_rt_data.RData")
+set.seed(21)
+```
+
+The correlation function is designed to provide Spearman correlation values between two R objects, and classify them according to whether the correlation is positive, negative or if there is no correlation whatsoever:
+
+```{r}
+Decile_Corr <- function(x, y) {
+  xy <- cor(x, y, method = "spearman")
+  if (xy < 0) {
+    print(-1)
+  } else if (xy > 0) {
+    print(1)
+  } else {
+    print(0)
+  }
+}
+```
+
+The function is tested by applying it to a fake dataset (provided by the 'mtcars' dataset), providing classification of a positive correlation or negative correlation (represented as 1 or -1, respectively).
+
+```{r}
+Decile_Corr(mtcars$mpg, mtcars$cyl)
+Decile_Corr(mtcars$disp, mtcars$hp)
+```
+
+We can then filter data from 20 participants in the french lexicon project, and compute the deciles for the word and non-word condition reaction times in order to classify correlations across deciles/conditions. 
+
+```{r}
+participant_numbers <- sample(flp$participant, 20, replace = FALSE)
+
+p_num <- c(764, 247, 680, 180, 936, 896, 100, 168, 962, 826, 649, 912, 57, 602, 171, 37, 511,
+           275, 486, 616)
+
+P_Data <- filter(flp, participant %in% p_num)
+
+P_Data_Non_Word <- filter(P_Data, condition %in% "non-word")
+P_Data_Word <- filter(P_Data, condition %in% "word")
+
+NW_Deciles <- by(P_Data_Non_Word$rt, P_Data_Non_Word$participant, deciles)
+W_Deciles <- by(P_Data_Word$rt, P_Data_Word$participant, deciles)
+
+Final_NW_Deciles <- NW_Deciles[lapply(NW_Deciles, length) == 9]
+Final_W_Deciles <- W_Deciles[lapply(W_Deciles, length) == 9]
+
+Non_Word_Deciles <- purrr::flatten_dbl(Final_NW_Deciles)
+Word_Deciles <- purrr::flatten_dbl(Final_W_Deciles)
+
+Participants <- rep(1:20, each = 9)
+Final_Df <- as.data.frame(cbind(Word_Deciles, Non_Word_Deciles, Participants))
+```
+
+The Decile_Corr function can then be applied across participant deciles and conditions. This example uses the deciles from the first participant:
+
+```{r}
+Par_1 <- subset(Final_Df, Participants == 1, 
+select=c(Word_Deciles, Non_Word_Deciles))
+
+Res <- apply(Par_1, 1, FUN = function(X) 
+  Decile_Corr(Par_1$Word_Deciles, Par_1$Non_Word_Deciles))
+```
