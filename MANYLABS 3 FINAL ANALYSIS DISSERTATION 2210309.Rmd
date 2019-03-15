@@ -1,0 +1,127 @@
+---
+title: "ManyLabs 3 Analysis: Shift Function and Stochastic Dominance Analysis"
+output: html_notebook
+---
+
+Load data and packages
+
+```{r}
+source("Rallfun-v35.txt")
+source("wilcox_modified.txt")
+source("rgar_visualisation.txt")
+source("rgar_utils.txt")
+library("tidyverse")
+library("cowplot")
+
+Raw_Data <- read.csv("Stroop_Raw_Data.csv")
+
+```
+
+Filter data
+
+```{r}
+Congruent_Trials <- filter(Raw_Data, congruent %in% "Congruent")
+Incongruent_Trials <- filter(Raw_Data,congruent %in% "Incongruent")
+
+Congruent_Trials$session_id <- factor(Congruent_Trials$session_id)
+Incongruent_Trials$session_id <- factor(Incongruent_Trials$session_id)
+
+
+Congruent_Deciles <- do.call("rbind", tapply(Congruent_Trials$trial_latency, Congruent_Trials$session_id, quantile, seq(.2, .8, .1), type = 8))
+
+Incongruent_Deciles <- do.call("rbind", tapply(Incongruent_Trials$trial_latency, Incongruent_Trials$session_id, quantile, seq(.2, .8, .1), type = 8))
+
+Final_Congruent_Deciles <- c(t(Congruent_Deciles))
+Final_Incongruent_Deciles <- c(t(Incongruent_Deciles))
+Participants <- rep(seq(1:3337), each = 7)
+
+Final_df <- as.data.frame(cbind(Participants, Final_Congruent_Deciles, Final_Incongruent_Deciles)) 
+
+```
+
+Run shift function between deciles
+
+```{r}
+Shift <- shifthd(Final_df$Final_Incongruent_Deciles, Final_df$Final_Congruent_Deciles, nboot=200)
+
+sf <- ggplot(Shift, aes(x=group1, y=group1-group2)) + 
+    geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), width=.1) +
+    geom_line(linetype = 1, color = "green", size = 1.2) +
+    geom_point(color="black", size=3) +
+  ylim(-150, 150) +
+  xlim(450, 875)
+sf + geom_hline(yintercept=0, linetype = "dashed") +
+     theme_gray(base_size = 15) +
+  xlab("Incongruent Deciles (ms)") + ylab("Incongruent - Congruent Deciles (ms)")
+
+```
+
+Create and run stochastic dominance function to test for positive or negative deciles differences within participants (1 = positive shift, 0 = negative shift). Then, test for any negative shifts to support hypothesis of a positive shift between congruent and incongruent deciles.
+
+```{r}
+Stoch_Dominance <- function(Vec_One) {
+  SD <- sign(Vec_One)
+  SD[SD == -1] <- 0
+  return(as.data.frame(SD))
+}
+
+Decile_Differences <- Final_Incongruent_Deciles - Final_Congruent_Deciles
+a <- as.vector(Stoch_Dominance(Decile_Differences))
+
+x <- length(a[ a == 1 ])
+y <- length(a[ a == 0 ])
+
+x
+y
+```
+
+
+Create regression function and run function over condition deciles for each participant. Then, test for any negative slopes between deciles to confirm hypothesis of a positive relationship between congruent and incongruent deciles.
+
+```{r}
+RaD <- function(x, y) {
+  xy <- lm(x ~ y)
+  co_eff <- sign(xy$coefficients[2])
+  sumres <- summary(xy)
+  p_res <- sumres$coefficients[2, 4]
+  if (co_eff == -1 & p_res < 0.05) {
+    print(0)
+  } else if (co_eff == 1 & p_res < 0.05) {
+    print(1) 
+  } else {
+    print("No Significant Relationship")
+  }
+}
+
+Regression <- by(Final_df, Participants, 
+   function(x) RaD(Final_df$Final_Congruent_Deciles, Final_df$Final_Incongruent_Deciles))
+
+as.vector(Regression)
+y <- Regression[Regression == 0]
+y
+```
+
+Create correlation function and run function over condition deciles for each participant. Then, test for any negative correlations to support hypothesis of positive shift between congruent and incongruent deciles.
+
+```{r}
+Decile_Corr <- function(x, y) {
+  xy <- cor(x, y, method = "spearman")
+  if (xy < 0) {
+    print(0)
+  } else if (xy > 0) {
+    print(1)
+  } else {
+    print("No Correlation")
+  }
+}
+
+Correlation <- by(Final_df, Participants, 
+   function(x) Decile_Corr(Final_df$Final_Congruent_Deciles, Final_df$Final_Incongruent_Deciles))
+
+as.vector(Correlation)
+x <- Correlation[Correlation == 0]
+x
+
+
+```
+
