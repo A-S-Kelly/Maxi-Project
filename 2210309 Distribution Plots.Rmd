@@ -1,0 +1,106 @@
+---
+title: "Distribution Analyses: FLP and ManyLabs 3 Stroop Task"
+output: html_notebook
+---
+
+Load data and packages, change value/column names
+
+```{r}
+load("french_lexicon_project_rt_data.RData")
+Stroop_Data <- read.csv("Stroop_Raw_Data.csv")
+library(plyr)
+library(tidyverse)
+set.seed(3)
+
+colnames(flp)[colnames(flp)=="condition"] <- "Condition"
+colnames(Stroop_Data) [colnames(Stroop_Data)=="congruent"] <- "Congruent"
+flp$Condition <- revalue(flp$Condition, c("word"="Word"))
+flp$Condition <- revalue(flp$Condition, c("non-word"="Non-Word"))
+```
+
+Calculate the average values of mean condition values
+
+```{r}
+Non_Word_Data <- filter(flp, Condition %in% "Non-Word")
+Word_Data <- filter(flp, Condition %in% "Word")
+
+NW_Means <- by(Non_Word_Data$rt, Non_Word_Data$participant, mean)
+W_Means <- by(Word_Data$rt, Word_Data$participant, mean)
+
+Av_W_Means <- mean(W_Means)
+Av_NW_Means <- mean(NW_Means)
+
+Incongruent_Data <- filter(Stroop_Data, Congruent %in% "Incongruent")
+Congruent_Data <- filter(Stroop_Data, Congruent %in% "Congruent")
+
+In_Means <- by(Incongruent_Data$trial_latency, Incongruent_Data$session_id, mean)
+Con_Means <- by(Congruent_Data$trial_latency, Congruent_Data$session_id, mean)
+
+Av_In_Means <- mean(In_Means)
+Av_Con_Means <- mean(Con_Means)
+```
+
+Plot overall distributions of RT data for FLP and Stroop task data
+
+```{r}
+FLP_Density <- ggplot(flp, aes(rt, colour = Condition)) +
+  geom_density() +
+  xlim(0, 2250) +
+  xlab("Reaction Times (ms)") +
+  ylab("Density")
+FLP_Density + theme(axis.title.x = element_text(color = "black", size = 14, face = "bold"),
+                    axis.title.y = element_text(color="black", size=14, face="bold"),
+                    aspect.ratio = 0.4)
+
+
+
+Stroop_Density <- ggplot(Stroop_Data, aes(trial_latency, colour = Congruent)) +
+  geom_density() +
+  xlim(-200, 2200) +
+  xlab("Reaction Times (ms)") +
+  ylab("Density")
+Stroop_Density + theme(axis.title.x = element_text(color = "black", size = 14, face = "bold"),
+                       axis.title.y = element_text(color="black", size=14, face="bold"),
+                       aspect.ratio = 0.4) 
+
+```
+
+Distribution shifts for 3 participants in each dataset
+
+```{r}
+flp_participants <- c(1:975)
+flp_par_numbers <- sample(flp_participants, 3)
+
+FLP_3_Data <- filter(flp, participant %in% seq(flp_par_numbers))
+
+FLP_3_Plot <- ggplot(data = FLP_3_Data, aes(rt, colour = Condition)) + 
+  geom_density() +
+  xlim(0, 1800) +
+  xlab("Reaction Times (ms)") +
+  ylab("Density") +
+  facet_wrap( ~ participant) 
+FLP_3_Plot + theme(axis.title.x = element_text(color = "black", size = 14, face = "bold"),
+                    axis.title.y = element_text(color="black", size=14, face="bold"), 
+                   legend.title = element_text(colour="blue", size=10, 
+                                      face="bold"), 
+                   legend.text = element_text(colour="blue", size=10, 
+                                     face="bold"),
+                   aspect.ratio = 0.6)
+
+
+Stroop_Data_Par <-  transform(Stroop_Data, id=match(session_id, unique(session_id)))
+stroop_participants <- c(1:3337)
+stroop_par_numbers <- sample(stroop_participants, 3)
+
+Stroop_3_Data <- filter(Stroop_Data_Par, id %in% seq(stroop_par_numbers))
+
+Stroop_3_Plot <- ggplot(data = Stroop_3_Data, aes(trial_latency, colour = Congruent)) + 
+  geom_density() +
+  facet_wrap( ~ id) +
+  xlim(0, 2000) + 
+  xlab("Reaction Times (ms)") +
+  ylab("Density")
+Stroop_3_Plot + theme(axis.title.x = element_text(color = "black", size = 14, face = "bold"),
+                    axis.title.y = element_text(color="black", size=14, face="bold"),
+                    aspect.ratio = 0.6)
+```
