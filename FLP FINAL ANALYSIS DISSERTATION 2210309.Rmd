@@ -1,0 +1,122 @@
+---
+title: "French Lexicon Project: Shift Function and Stochastic Dominance Analysis"
+output: html_notebook
+---
+
+Load packages and functions
+
+```{r}
+load("french_lexicon_project_rt_data.RData")
+source("Rallfun-v35.txt")
+source("wilcox_modified.txt")
+source("rgar_visualisation.txt")
+source("rgar_utils.txt")
+
+
+library("tidyverse")
+library("cowplot")
+library("purrr")
+
+```
+
+Filter data and calculate deciles per participant
+
+```{r}
+P_Data_Non_Word <- filter(flp, condition %in% "non-word")
+P_Data_Word <- filter(flp, condition %in% "word")
+
+Word_Deciles <- do.call("rbind", tapply(P_Data_Word$rt, P_Data_Word$participant, quantile, seq(.1, .9, .1), type = 8))
+
+Non_Word_Deciles <- do.call("rbind", tapply(P_Data_Non_Word$rt, P_Data_Non_Word$participant, quantile, seq(.1, .9, .1), type = 8))
+
+Final_Word_Deciles <- c(t(Word_Deciles))
+Final_Non_Word_Deciles <- c(t(Non_Word_Deciles))
+
+Participants <- as.factor(rep(seq(1:967), each = 9))
+Final_Df <- as.data.frame(cbind(Participants, Final_Non_Word_Deciles, Final_Word_Deciles))
+```
+
+Run shift function between deciles
+
+```{r}
+Shift_Fun <- shifthd(Non_Word_Deciles, Word_Deciles, nboot=200)
+
+Shift_Fun
+sf <- ggplot(Shift_Fun, aes(x=group1, y=group1-group2)) + 
+    geom_errorbar(aes(ymin=ci_lower, ymax=ci_upper), width=.1) +
+    geom_line(linetype = 1, color = "green", size = 1.2) +
+    geom_point(color="black", size=3) +
+  ylim(-175, 175) +
+  xlim(575, 1200)
+sf + geom_hline(yintercept=0, linetype = "dashed") +
+     theme_gray(base_size = 15) +
+  xlab("Non-Word Deciles (ms)") + ylab("Non-Word - Word Deciles (ms)")
+  
+```
+
+Create and run stochastic dominance function to test for positive or negative deciles differences within participants (1 = positive shift, 0 = negative shift). Then, test for any negative shifts to support hypothesis of a positive shift between congruent and incongruent deciles.
+
+```{r}
+Stoch_Dominance <- function(Vec_One) {
+  SD <- sign(Vec_One)
+  SD[SD == -1] <- 0
+  return(as.data.frame(SD))
+}
+
+Decile_Differences <- Non_Word_Deciles - Word_Deciles
+a <- as.vector(Stoch_Dominance(Decile_Differences))
+
+x <- length(a[ a == 1 ])
+y <- length(a[ a == 0 ])
+
+x
+y
+```
+
+Create regression function and run function over condition deciles for each participant. Then, test for any negative slopes between deciles to confirm hypothesis of a positive relationship between congruent and incongruent deciles.
+
+```{r}
+RaD <- function(x, y) {
+  xy <- lm(x ~ y)
+  co_eff <- sign(xy$coefficients[2])
+  sumres <- summary(xy)
+  p_res <- sumres$coefficients[2, 4]
+  if (co_eff == -1 & p_res < 0.05) {
+    print(0)
+  } else if (co_eff == 1 & p_res < 0.05) {
+    print(1) 
+  } else {
+    print("No Significant Relationship")
+  }
+}
+
+Res <- by(Final_Df, Participants, 
+   function(x) RaD(Final_Df$Final_Non_Word_Deciles, Final_Df$Final_Word_Deciles))
+
+x <- as.vector(Res)
+y <- x[x == 0]
+y
+```
+
+Create correlation function and run function over condition deciles for each participant. Then, test for any negative correlations to support hypothesis of positive shift between congruent and incongruent deciles.
+
+```{r}
+Decile_Corr <- function(x, y) {
+  xy <- cor(x, y, method = "spearman")
+  if (xy < 0) {
+    print(0)
+  } else if (xy > 0) {
+    print(1)
+  } else {
+    print("No Correlation")
+  }
+}
+
+Res_Cor <- by(Final_Df, Participants, 
+   function(x) Decile_Corr(Final_Df$Final_Non_Word_Deciles, Final_Df$Final_Word_Deciles))
+
+a <- as.vector(Res_Cor)
+b <- a[a == 0]
+b
+
+```
